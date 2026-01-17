@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.views.generic.detail import DetailView
+from django.views.generic import DetailView
 from .models import Book, Library
 
 
@@ -17,7 +17,8 @@ def list_books(request):
 class LibraryDetailView(DetailView):
     """
     Class-based view that displays details for a specific library,
-    including all books available in that library.
+    listing all books available in that library.
+    Utilizes Django's DetailView to structure this class-based view.
     """
     model = Library
     template_name = 'relationship_app/library_detail.html'
