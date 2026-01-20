@@ -59,6 +59,11 @@ X_FRAME_OPTIONS = 'DENY'
 # These settings ensure that the application is only accessed via HTTPS in production
 # WARNING: Only enable these settings when you have SSL/TLS certificates configured
 
+# Proxy SSL Header
+# Used when Django is behind a proxy/load balancer that handles SSL/TLS
+# This tells Django to trust the X-Forwarded-Proto header from the proxy
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 # Redirect all non-HTTPS requests to HTTPS
 # Set to True in production to enforce HTTPS
 SECURE_SSL_REDIRECT = False  # Set to True in production with HTTPS configured
