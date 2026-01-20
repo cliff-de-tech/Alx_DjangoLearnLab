@@ -55,6 +55,27 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 # DENY: The page cannot be displayed in a frame, regardless of the site attempting to do so
 X_FRAME_OPTIONS = 'DENY'
 
+# HTTPS and Secure Redirects
+# These settings ensure that the application is only accessed via HTTPS in production
+# WARNING: Only enable these settings when you have SSL/TLS certificates configured
+
+# Redirect all non-HTTPS requests to HTTPS
+# Set to True in production to enforce HTTPS
+SECURE_SSL_REDIRECT = False  # Set to True in production with HTTPS configured
+
+# HTTP Strict Transport Security (HSTS)
+# Instructs browsers to only access the site via HTTPS for the specified time period
+# This prevents SSL stripping attacks and cookie hijacking
+SECURE_HSTS_SECONDS = 31536000  # 1 year (31536000 seconds)
+
+# Include all subdomains in the HSTS policy
+# Ensures that all subdomains are also accessed via HTTPS
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+
+# Allow the site to be preloaded in browsers' HSTS preload lists
+# This provides protection even on the first visit to the site
+SECURE_HSTS_PRELOAD = True
+
 
 # Application definition
 
