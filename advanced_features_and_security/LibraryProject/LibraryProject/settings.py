@@ -23,9 +23,37 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-0irie*#p=^a46@c&b_d*h!i9qxy7d8g*&@ba2#%8#!(^zlqxk&'
 
 # SECURITY WARNING: don't run with debug turned on in production!
+# Set to False in production to prevent sensitive information leakage
 DEBUG = True
 
 ALLOWED_HOSTS = []
+
+# Security Settings
+# These settings enhance the security of the application by adding browser-side protections
+# and ensuring secure communication
+
+# CSRF Protection
+# Ensures CSRF cookies are only sent over HTTPS in production
+# Set to True in production to prevent CSRF attacks
+CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
+
+# Session Security
+# Ensures session cookies are only sent over HTTPS in production
+# Set to True in production to prevent session hijacking
+SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+
+# Browser Security Headers
+# Enable browser's XSS filtering to help prevent cross-site scripting attacks
+SECURE_BROWSER_XSS_FILTER = True
+
+# Prevent browsers from MIME-sniffing a response away from the declared content-type
+# This helps prevent attacks based on MIME-type confusion
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Clickjacking Protection
+# Prevents the site from being framed, protecting against clickjacking attacks
+# DENY: The page cannot be displayed in a frame, regardless of the site attempting to do so
+X_FRAME_OPTIONS = 'DENY'
 
 
 # Application definition
@@ -37,6 +65,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'csp',  # Django Content Security Policy
     'bookshelf',
     'relationship_app',
 ]
@@ -49,6 +78,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'csp.middleware.CSPMiddleware',  # Content Security Policy middleware
 ]
 
 ROOT_URLCONF = 'LibraryProject.urls'
@@ -130,3 +160,34 @@ AUTH_USER_MODEL = 'bookshelf.CustomUser'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Content Security Policy (CSP) Settings
+# CSP helps prevent XSS attacks by specifying which domains can be used to load content
+# These settings define a restrictive policy that only allows content from trusted sources
+
+from csp.constants import NONCE
+
+CONTENT_SECURITY_POLICY = {
+    'DIRECTIVES': {
+        # Allow content only from the same origin by default
+        'default-src': ["'self'"],
+        
+        # Allow scripts from self with nonce support for inline scripts
+        'script-src': ["'self'", NONCE],
+        
+        # Allow styles from self and inline styles (needed for some functionality)
+        'style-src': ["'self'", "'unsafe-inline'"],
+        
+        # Allow images from self and data URIs (for base64 encoded images)
+        'img-src': ["'self'", "data:"],
+        
+        # Allow fonts from self only
+        'font-src': ["'self'"],
+        
+        # Restrict AJAX, WebSocket connections to same origin
+        'connect-src': ["'self'"],
+        
+        # Prevent the site from being framed (clickjacking protection)
+        'frame-ancestors': ["'none'"],
+    }
+}
