@@ -1,19 +1,53 @@
-from rest_framework import generics
+from rest_framework import generics, filters
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, IsAdminUser
+from django_filters import rest_framework as django_filters
 from .models import Book
 from .serializers import BookSerializer
 
 
 # ListView: Retrieves all books. Open to all users (read-only for unauthenticated).
+# Supports filtering by title, author, and publication_year via DjangoFilterBackend.
+# Supports text search on title and author name via SearchFilter.
+# Supports ordering by title and publication_year via OrderingFilter.
 class BookListView(generics.ListAPIView):
     """
     GET /api/books/
     Returns a list of all Book instances.
     Accessible to all users; unauthenticated users get read-only access.
+
+    Filtering:
+        ?title=<value>           - Filter by exact title
+        ?author=<id>             - Filter by author ID
+        ?publication_year=<year> - Filter by publication year
+
+    Searching:
+        ?search=<term>           - Search across title and author name
+
+    Ordering:
+        ?ordering=title          - Order by title (ascending)
+        ?ordering=-title         - Order by title (descending)
+        ?ordering=publication_year - Order by publication year
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+
+    # Enable filtering, searching, and ordering backends
+    filter_backends = [
+        django_filters.DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+
+    # DjangoFilterBackend: fields available for exact-match filtering
+    filterset_fields = ['title', 'author', 'publication_year']
+
+    # SearchFilter: fields available for text search
+    search_fields = ['title', 'author__name']
+
+    # OrderingFilter: fields available for ordering; default ordering by title
+    ordering_fields = ['title', 'publication_year']
+    ordering = ['title']
 
 
 # DetailView: Retrieves a single book by its primary key.
