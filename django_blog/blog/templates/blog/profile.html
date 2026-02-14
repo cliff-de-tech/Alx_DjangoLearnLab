@@ -1,0 +1,28 @@
+{% extends "blog/base.html" %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<h2>Your Profile</h2>
+
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <fieldset>
+        <legend>User Information</legend>
+        {{ user_form.as_p }}
+    </fieldset>
+    <fieldset>
+        <legend>Profile Details</legend>
+        {{ profile_form.as_p }}
+    </fieldset>
+    <button type="submit">Update Profile</button>
+</form>
+{% endblock %}
