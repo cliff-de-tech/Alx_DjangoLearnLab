@@ -1,9 +1,13 @@
 {% extends "blog/base.html" %}
 
-{% block title %}Blog Posts{% endblock %}
+{% block title %}Search Results{% endblock %}
 
 {% block content %}
-<h1>Blog Posts</h1>
+<h1>Search Results</h1>
+{% if query %}
+<p>Results for "<strong>{{ query }}</strong>":</p>
+{% endif %}
+
 {% for post in posts %}
 <div class="post">
     <h2><a href="{% url 'post-detail' post.pk %}">{{ post.title }}</a></h2>
@@ -18,6 +22,6 @@
     {% endif %}
 </div>
 {% empty %}
-<p>No posts available.</p>
+<p>No posts found matching your search.</p>
 {% endfor %}
 {% endblock %}

@@ -6,8 +6,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy, reverse
-from .forms import CustomUserCreationForm, ProfileForm, UserUpdateForm, CommentForm
+from django.db.models import Q
+from .forms import CustomUserCreationForm, ProfileForm, UserUpdateForm, CommentForm, PostForm
 from .models import Post, Comment
+from taggit.models import Tag
 
 
 def home(request):
@@ -36,7 +38,7 @@ class PostDetailView(DetailView):
 
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
-    fields = ['title', 'content']
+    form_class = PostForm
     template_name = 'blog/post_form.html'
 
     def form_valid(self, form):
@@ -46,7 +48,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
-    fields = ['title', 'content']
+    form_class = PostForm
     template_name = 'blog/post_form.html'
 
     def form_valid(self, form):
@@ -69,6 +71,34 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 
 # ─── Comment Views ────────────────────────────────────────────────
+
+# ─── Search & Tag Views ─────────────────────────────────────────
+
+def search_posts(request):
+    query = request.GET.get('q', '')
+    results = Post.objects.all()
+    if query:
+        results = results.filter(
+            Q(title__icontains=query) |
+            Q(content__icontains=query) |
+            Q(tags__name__icontains=query)
+        ).distinct()
+    return render(request, 'blog/search_results.html', {'posts': results, 'query': query})
+
+
+class PostByTagListView(ListView):
+    model = Post
+    template_name = 'blog/post_list_by_tag.html'
+    context_object_name = 'posts'
+
+    def get_queryset(self):
+        self.tag = get_object_or_404(Tag, slug=self.kwargs.get('tag_slug'))
+        return Post.objects.filter(tags__in=[self.tag]).order_by('-published_date')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['tag'] = self.tag
+        return context
 
 class CommentCreateView(LoginRequiredMixin, CreateView):
     model = Comment

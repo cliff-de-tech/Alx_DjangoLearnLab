@@ -6,6 +6,13 @@
 <article class="post-detail">
     <h1>{{ object.title }}</h1>
     <p class="meta">By {{ object.author }} on {{ object.published_date }}</p>
+    {% if object.tags.all %}
+    <p class="tags">Tags:
+        {% for tag in object.tags.all %}
+        <a href="{% url 'post-by-tag' tag.slug %}">{{ tag.name }}</a>{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    </p>
+    {% endif %}
     <div class="post-content">
         {{ object.content }}
     </div>
