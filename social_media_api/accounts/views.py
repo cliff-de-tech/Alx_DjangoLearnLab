@@ -5,6 +5,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .models import CustomUser
 from .serializers import LoginSerializer, RegisterSerializer, UserProfileSerializer
 
 User = get_user_model()
@@ -62,13 +63,14 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
         return self.request.user
 
 
-class FollowUserView(APIView):
+class FollowUserView(generics.GenericAPIView):
     """Follow another user."""
 
     permission_classes = [permissions.IsAuthenticated]
+    queryset = CustomUser.objects.all()
 
     def post(self, request, user_id):
-        target_user = get_object_or_404(User, pk=user_id)
+        target_user = get_object_or_404(CustomUser.objects.all(), pk=user_id)
         if target_user == request.user:
             return Response(
                 {'error': 'You cannot follow yourself.'},
@@ -81,13 +83,14 @@ class FollowUserView(APIView):
         )
 
 
-class UnfollowUserView(APIView):
+class UnfollowUserView(generics.GenericAPIView):
     """Unfollow a user."""
 
     permission_classes = [permissions.IsAuthenticated]
+    queryset = CustomUser.objects.all()
 
     def post(self, request, user_id):
-        target_user = get_object_or_404(User, pk=user_id)
+        target_user = get_object_or_404(CustomUser.objects.all(), pk=user_id)
         request.user.following.remove(target_user)
         return Response(
             {'message': f'You have unfollowed {target_user.username}.'},
