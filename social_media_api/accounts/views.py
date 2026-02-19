@@ -77,6 +77,13 @@ class FollowUserView(generics.GenericAPIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         request.user.following.add(target_user)
+        # Create a follow notification
+        from notifications.models import Notification
+        Notification.objects.get_or_create(
+            recipient=target_user,
+            actor=request.user,
+            verb='started following you',
+        )
         return Response(
             {'message': f'You are now following {target_user.username}.'},
             status=status.HTTP_200_OK,
