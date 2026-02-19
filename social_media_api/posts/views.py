@@ -1,5 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, permissions, viewsets
+from rest_framework import filters, generics, permissions, viewsets
 
 from .models import Comment, Post
 from .serializers import CommentSerializer, PostSerializer
@@ -30,3 +30,14 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+
+class FeedView(generics.ListAPIView):
+    """Return posts from users the current user follows, ordered by most recent."""
+
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        followed_users = self.request.user.following.all()
+        return Post.objects.filter(author__in=followed_users).order_by('-created_at')
